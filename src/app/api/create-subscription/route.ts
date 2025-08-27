@@ -1,24 +1,30 @@
+import { getAuth } from "@/lib/get-auth";
+import { createSubscriptionSchema } from "@/lib/schema";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(request: Request) {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-    const {
-      customerId,
-      priceId,
-      paymentMethodId,
-    }: { customerId: string; priceId: string; paymentMethodId?: string } =
-      await request.json();
+    const auth = await getAuth();
 
-    if (!customerId || !priceId) {
-      return NextResponse.json(
-        { error: "customerId and priceId are required" },
-        { status: 400 }
-      );
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const customerId = auth.session?.user.user_metadata.customerId;
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    const data = await request.json();
+
+    const safeData = createSubscriptionSchema.safeParse(data);
+
+    if (!safeData.success) {
+      return NextResponse.json(safeData.error, { status: 400 });
     }
 
     const customer = await stripe.customers.retrieve(customerId);
+
     if (!("id" in customer)) {
       return NextResponse.json(
         { error: "Customer not found" },
@@ -26,7 +32,7 @@ export async function POST(request: Request) {
       );
     }
 
-    let defaultPaymentMethodId = paymentMethodId;
+    let defaultPaymentMethodId = safeData.data.paymentMethodId;
 
     // If no payment method is provided, we have a few options for testing
     if (!defaultPaymentMethodId) {
@@ -77,7 +83,7 @@ export async function POST(request: Request) {
 
     const params: Stripe.SubscriptionCreateParams = {
       customer: customer.id,
-      items: [{ price: priceId }],
+      items: [{ price: safeData.data.priceId }],
       collection_method: "charge_automatically",
       expand: ["latest_invoice.payment_intent"], // Expand for more details
     };
@@ -91,6 +97,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       subscriptionId: subscription.id,
+      // @ts-expect-error types are outdated i think
       clientSecret: subscription.latest_invoice?.payment_intent?.client_secret,
       status: subscription.status,
     });

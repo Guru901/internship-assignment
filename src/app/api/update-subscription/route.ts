@@ -1,21 +1,30 @@
 // src/app/api/update-subscription/route.ts
+import { getAuth } from "@/lib/get-auth";
+import { updateSubscriptionSchema } from "@/lib/schema";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(request: Request) {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const auth = await getAuth();
 
-    const { subscriptionId }: { subscriptionId: string } = await request.json();
-
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: "subscriptionId is required" },
-        { status: 400 }
-      );
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const current = await stripe.subscriptions.retrieve(subscriptionId);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    const data = await request.json();
+
+    const safeData = updateSubscriptionSchema.safeParse(data);
+
+    if (!safeData.success) {
+      return NextResponse.json(safeData.error, { status: 400 });
+    }
+
+    const current = await stripe.subscriptions.retrieve(
+      safeData.data.subscriptionId
+    );
     if (!current) {
       return NextResponse.json(
         { error: "Subscription not found" },
@@ -31,11 +40,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const updated = await stripe.subscriptions.update(subscriptionId, {
-      items: [{ id: subscriptionItemId, quantity: 2 }],
-      proration_behavior: "create_prorations",
-      payment_behavior: "allow_incomplete",
-    });
+    const updated = await stripe.subscriptions.update(
+      safeData.data.subscriptionId,
+      {
+        items: [{ id: subscriptionItemId, quantity: 2 }],
+        proration_behavior: "create_prorations",
+        payment_behavior: "allow_incomplete",
+      }
+    );
 
     return NextResponse.json({
       subscriptionId: updated.id,

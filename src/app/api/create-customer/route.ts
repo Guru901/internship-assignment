@@ -1,13 +1,28 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
+import { getAuth } from "@/lib/get-auth";
+import { createCustomerSchema } from "@/lib/schema";
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await getAuth();
+
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const data = await request.json();
+
+    const safeData = createCustomerSchema.safeParse(data);
+
+    if (!safeData.success) {
+      return NextResponse.json(safeData.error, { status: 400 });
+    }
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
     const search = await stripe.customers.search({
-      query: `email:'${data.email}'`,
+      query: `email:'${safeData.data.email}'`,
       limit: 1,
     });
 
@@ -15,9 +30,9 @@ export async function POST(request: NextRequest) {
 
     if (!customer) {
       customer = await stripe.customers.create({
-        email: data.email,
-        description: data.description,
-        metadata: data.metadata,
+        email: safeData.data.email,
+        description: safeData.data.description,
+        metadata: safeData.data.metadata,
       });
     }
 

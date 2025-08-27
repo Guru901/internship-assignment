@@ -1,20 +1,28 @@
+import { getAuth } from "@/lib/get-auth";
+import { cancelSubscriptionSchema } from "@/lib/schema";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(request: Request) {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const auth = await getAuth();
 
-    const { subscriptionId }: { subscriptionId: string } = await request.json();
-
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: "subscriptionId is required" },
-        { status: 400 }
-      );
+    if (!auth) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+    const data = await request.json();
+    const safeData = cancelSubscriptionSchema.safeParse(data);
+
+    if (!safeData.success) {
+      return NextResponse.json(safeData.error, { status: 400 });
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(
+      safeData.data.subscriptionId
+    );
 
     if (!subscription) {
       return NextResponse.json(
@@ -23,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await stripe.subscriptions.cancel(subscriptionId);
+    await stripe.subscriptions.cancel(safeData.data.subscriptionId);
 
     return NextResponse.json({
       subscriptionId: subscription.id,
