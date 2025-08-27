@@ -14,18 +14,27 @@ export async function POST(request: NextRequest) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-    const customer = await stripe.customers.create({
-      email: safeData.data.email,
-      description: safeData.data.description,
-      metadata: safeData.data.metadata,
-      payment_method: "card",
+    const search = await stripe.customers.search({
+      query: `email:'${safeData.data.email}'`,
+      limit: 1,
     });
+
+    let customer = search.data?.[0];
+
+    if (!customer) {
+      customer = await stripe.customers.create({
+        email: safeData.data.email,
+        description: safeData.data.description,
+        metadata: safeData.data.metadata,
+      });
+    }
 
     const product = await stripe.products.search({
-      query: `name~"test product"`,
+      query: `name:'test product'`,
+      limit: 1,
     });
 
-    if (!product.data) {
+    if (!product.data || product.data.length === 0) {
       await stripe.products.create({
         name: "test product",
         description: "test description",

@@ -1,5 +1,4 @@
 import { AuthButton } from "@/components/(auth)/auth-button";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
@@ -18,10 +17,6 @@ export default async function Home() {
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-  const customer = await stripe.customers.retrieve(
-    user.user_metadata.customerId
-  );
 
   const products = await stripe.products.search({
     query: `name~"test product"`,
@@ -45,15 +40,15 @@ export default async function Home() {
             </p>
             <div>
               <h1>Product</h1>
-              <CreateSubscriptionButton
-                customerId={user.user_metadata.customerId}
-                priceId={products.data[0].default_price as string}
-              />
               <div>
                 {products.data.map((product) => (
                   <div key={product.id}>{product.name}</div>
                 ))}
               </div>
+              <CreateSubscriptionButton
+                customerId={user.user_metadata.customerId}
+                priceId={products.data[0].default_price as string}
+              />
             </div>
           </div>
         </div>
