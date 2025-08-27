@@ -259,7 +259,7 @@ async function handlePaymentFailed(invoice) {
 }
 ```
 
-Copy this code into the edge functions and don't forget to add the environment variables.
+Copy this code into the edge functions and don't forget to add the environment variables. Also you would need to turn `Verify JWT with legacy secret` off in the details tab.
 You would need to add the following environment variables:
 
 - STRIPE_SECRET_KEY
