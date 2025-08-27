@@ -88,7 +88,7 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_ANON_KEY") ?? ""
 );
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
-console.log("🚀 Stripe Webhook Function booted!");
+console.log("Stripe Webhook Function booted!");
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", {
@@ -122,7 +122,7 @@ Deno.serve(async (request) => {
       status: 400,
     });
   }
-  console.log(`🔔 Event received: ${receivedEvent.type} - ${receivedEvent.id}`);
+  console.log(`Event received: ${receivedEvent.type} - ${receivedEvent.id}`);
   try {
     switch (receivedEvent.type) {
       case "customer.subscription.created":
@@ -141,7 +141,7 @@ Deno.serve(async (request) => {
         await handlePaymentFailed(receivedEvent.data.object);
         break;
       default:
-        console.log(`ℹ️ Unhandled event type: ${receivedEvent.type}`);
+        console.log(`Unhandled event type: ${receivedEvent.type}`);
     }
   } catch (error) {
     console.error("❌ Error handling webhook:", error);
@@ -171,7 +171,7 @@ function safeTimestampToISO(timestamp) {
   }
 }
 async function handleSubscriptionCreated(subscription) {
-  console.log("✅ Processing subscription created:", subscription.id);
+  console.log("Processing subscription created:", subscription.id);
   const { error } = await supabase.from("subscriptions").insert({
     stripe_subscription_id: subscription.id,
     stripe_customer_id: subscription.customer,
@@ -185,10 +185,10 @@ async function handleSubscriptionCreated(subscription) {
     console.error("❌ Error inserting subscription:", error);
     throw error;
   }
-  console.log("✅ Subscription created in database");
+  console.log("Subscription created in database");
 }
 async function handleSubscriptionUpdated(subscription) {
-  console.log("✅ Processing subscription updated:", subscription.id);
+  console.log("Processing subscription updated:", subscription.id);
   const { error } = await supabase
     .from("subscriptions")
     .update({
@@ -201,13 +201,13 @@ async function handleSubscriptionUpdated(subscription) {
     })
     .eq("stripe_subscription_id", subscription.id);
   if (error) {
-    console.error("❌ Error updating subscription:", error);
+    console.error("Error updating subscription:", error);
     throw error;
   }
-  console.log("✅ Subscription updated in database");
+  console.log("Subscription updated in database");
 }
 async function handleSubscriptionCanceled(subscription) {
-  console.log("✅ Processing subscription canceled:", subscription.id);
+  console.log("Processing subscription canceled:", subscription.id);
   const { error } = await supabase
     .from("subscriptions")
     .update({
@@ -217,13 +217,13 @@ async function handleSubscriptionCanceled(subscription) {
     })
     .eq("stripe_subscription_id", subscription.id);
   if (error) {
-    console.error("❌ Error canceling subscription:", error);
+    console.error("Error canceling subscription:", error);
     throw error;
   }
-  console.log("✅ Subscription canceled in database");
+  console.log("Subscription canceled in database");
 }
 async function handlePaymentSucceeded(invoice) {
-  console.log("✅ Processing payment succeeded:", invoice.id);
+  console.log("Processing payment succeeded:", invoice.id);
   const { error } = await supabase.from("payments").insert({
     stripe_invoice_id: invoice.id,
     stripe_customer_id: invoice.customer,
@@ -235,13 +235,13 @@ async function handlePaymentSucceeded(invoice) {
     created_at: new Date().toISOString(),
   });
   if (error) {
-    console.error("❌ Error inserting payment:", error);
+    console.error("Error inserting payment:", error);
     throw error;
   }
-  console.log("✅ Payment success recorded in database");
+  console.log("Payment success recorded in database");
 }
 async function handlePaymentFailed(invoice) {
-  console.log("✅ Processing payment failed:", invoice.id);
+  console.log("Processing payment failed:", invoice.id);
   const { error } = await supabase.from("payments").insert({
     stripe_invoice_id: invoice.id,
     stripe_customer_id: invoice.customer,
@@ -252,10 +252,10 @@ async function handlePaymentFailed(invoice) {
     created_at: new Date().toISOString(),
   });
   if (error) {
-    console.error("❌ Error inserting failed payment:", error);
+    console.error("Error inserting failed payment:", error);
     throw error;
   }
-  console.log("✅ Payment failure recorded in database");
+  console.log("Payment failure recorded in database");
 }
 ```
 
