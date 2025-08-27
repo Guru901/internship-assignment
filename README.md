@@ -116,6 +116,6 @@ stripe trigger customer.subscription.deleted
 
 ## Time spent
 
-I have never used Supbase/Firebase, Webhooks or Stripe before. So it took me a while to figure out how to do this. I'm sure there are better ways to do this, but this is what I came up with.
+I have never used Supbase/Firebase, Webhooks and Stripe before. So it took me a while to figure out how to do this. I'm sure there are better ways to do this, but this is what I came up with.
 
 It took me around 10-12 hrs to figure out how to do this.
