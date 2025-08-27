@@ -16,7 +16,7 @@ STRIPE_SECRET_KEY=
 
 ## Setup
 
-### Supabase Setup
+#### Supabase Setup
 
 1. Create a Supabase project
 2. Get the environment variables from Supabase
@@ -66,7 +66,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_customer_id ON payments(stripe_customer_
 
 ---
 
-### Stripe Setup
+#### Stripe Setup
 
 1. Create a Stripe account
 2. Get the environment variables from Stripe
