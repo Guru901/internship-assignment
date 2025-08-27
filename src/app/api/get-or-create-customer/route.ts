@@ -18,7 +18,23 @@ export async function POST(request: NextRequest) {
       email: safeData.data.email,
       description: safeData.data.description,
       metadata: safeData.data.metadata,
+      payment_method: "card",
     });
+
+    const product = await stripe.products.search({
+      query: `name~"test product"`,
+    });
+
+    if (!product.data) {
+      await stripe.products.create({
+        name: "test product",
+        description: "test description",
+        default_price_data: {
+          currency: "usd",
+          unit_amount: 1000,
+        },
+      });
+    }
 
     if (!customer.id) {
       return NextResponse.json(
