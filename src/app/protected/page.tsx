@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Stripe from "stripe";
 import CreateSubscriptionButton from "./create-subscription";
 import { CancelSubscription } from "./cancel-subscription";
+import { UpdateSubscription } from "./update-subscription";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -346,8 +347,10 @@ export default async function Home() {
                               subscription.items.data[0]?.price?.currency
                             )}
                           </span>
-
-                          <CancelSubscription subscription={subscription} />
+                          <div className="space-x-2">
+                            <CancelSubscription subscription={subscription} />
+                            <UpdateSubscription subscription={subscription} />
+                          </div>
                         </div>
                       </div>
                     </div>
