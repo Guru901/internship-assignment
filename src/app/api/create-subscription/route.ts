@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const customerId = auth.session?.user.user_metadata.customerId;
+    const customerId = auth.user_metadata.customerId;
 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 

@@ -3,11 +3,13 @@ import { createClient } from "./supabase/server";
 
 export const getAuth = cache(async () => {
   const supabase = createClient();
-  const { data } = await (await supabase).auth.getSession();
+  const {
+    data: { user },
+  } = await (await supabase).auth.getUser();
 
-  if (!data) {
+  if (!user) {
     return null;
   }
 
-  return data;
+  return user;
 });
