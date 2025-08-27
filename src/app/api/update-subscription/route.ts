@@ -32,6 +32,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (current.id !== safeData.data.subscriptionId) {
+      return NextResponse.json(
+        { error: "You are not authorized to update this subscription" },
+        { status: 401 }
+      );
+    }
+
     const subscriptionItemId = current.items.data[0]?.id;
     if (!subscriptionItemId) {
       return NextResponse.json(

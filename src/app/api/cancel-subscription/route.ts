@@ -31,6 +31,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (subscription.id !== safeData.data.subscriptionId) {
+      return NextResponse.json(
+        { error: "You are not authorized to cancel this subscription" },
+        { status: 401 }
+      );
+    }
+
     await stripe.subscriptions.cancel(safeData.data.subscriptionId);
 
     return NextResponse.json({
