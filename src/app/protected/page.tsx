@@ -48,8 +48,8 @@ export default async function Home() {
 
   // Fetch product details for subscriptions separately
   const productIds = new Set<string>();
-  subscriptions.data.forEach((subscription: any) => {
-    subscription.items.data.forEach((item: any) => {
+  subscriptions.data.forEach((subscription: Stripe.Subscription) => {
+    subscription.items.data.forEach((item: Stripe.SubscriptionItem) => {
       if (item.price?.product && typeof item.price.product === "string") {
         productIds.add(item.price.product);
       }
@@ -184,7 +184,7 @@ export default async function Home() {
                   <dd className="text-lg font-medium text-gray-900">
                     {
                       subscriptions.data.filter(
-                        (sub: any) => sub.status === "active"
+                        (sub: Stripe.Subscription) => sub.status === "active"
                       ).length
                     }
                   </dd>
@@ -220,7 +220,7 @@ export default async function Home() {
                   <dd className="text-lg font-medium text-gray-900">
                     {
                       paymentIntents.data.filter(
-                        (pi: any) => pi.status === "succeeded"
+                        (pi: Stripe.PaymentIntent) => pi.status === "succeeded"
                       ).length
                     }
                   </dd>
@@ -271,7 +271,7 @@ export default async function Home() {
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.data.map((product: any) => (
+              {products.data.map((product: Stripe.Product) => (
                 <div
                   key={product.id}
                   className="border border-gray-200 rounded-lg p-4"
@@ -391,30 +391,32 @@ export default async function Home() {
                   </p>
                 </div>
               ) : (
-                paymentIntents.data.slice(0, 5).map((payment: any) => (
-                  <div key={payment.id} className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-sm font-medium text-gray-900">
-                            {formatCurrency(payment.amount, payment.currency)}
-                          </span>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(
-                              payment.status
-                            )}`}
-                          >
-                            {payment.status}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-sm text-gray-500">
-                          {formatDate(payment.created)} •{" "}
-                          {payment.payment_method_types.join(", ")}
+                paymentIntents.data
+                  .slice(0, 5)
+                  .map((payment: Stripe.PaymentIntent) => (
+                    <div key={payment.id} className="px-6 py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatCurrency(payment.amount, payment.currency)}
+                            </span>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(
+                                payment.status
+                              )}`}
+                            >
+                              {payment.status}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-sm text-gray-500">
+                            {formatDate(payment.created)} •{" "}
+                            {payment.payment_method_types.join(", ")}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
             </div>
           </div>
@@ -450,7 +452,7 @@ export default async function Home() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {invoices.data.slice(0, 5).map((invoice: any) => (
+                  {invoices.data.slice(0, 5).map((invoice: Stripe.Invoice) => (
                     <tr key={invoice.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">

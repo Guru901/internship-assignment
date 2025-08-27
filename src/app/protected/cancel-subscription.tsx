@@ -23,7 +23,7 @@ export function CancelSubscription({
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Subscription cancelled successfully");
       location.reload();
     },

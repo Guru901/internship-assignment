@@ -56,7 +56,7 @@ CREATE INDEX IF NOT EXISTS idx_payments_stripe_invoice_id ON payments(stripe_inv
 CREATE INDEX IF NOT EXISTS idx_payments_customer_id ON payments(stripe_customer_id);
 ```
 
-4. Then go to the Supabase Edge Functions and create a new Edge Function and paste the code from the [edge-functions.ts](edge-functions.ts) file
+4. Then go to the Supabase Edge Functions and create a new Edge Function and paste the code from the [edge-functions.js](edge-functions.js) file
 5. Then go to the Secret's tab and add the following environment variables:
 
 - STRIPE_SECRET_KEY

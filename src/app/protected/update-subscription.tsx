@@ -23,7 +23,7 @@ export function UpdateSubscription({
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Subscription updated successfully");
       location.reload();
     },

@@ -25,7 +25,7 @@ export default function CreateSubscriptionButton({
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Subscription created successfully");
       location.reload();
     },
