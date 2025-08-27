@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function LoginForm({
   className,
@@ -26,6 +27,34 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const createCustomerMutation = useMutation({
+    mutationKey: ["getOrCreateCustomer"],
+    mutationFn: async ({
+      email,
+      supabaseId,
+    }: {
+      email: string;
+      supabaseId: string;
+    }) => {
+      const response = await fetch("/api/get-or-create-customer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          description: "Created by the supabase",
+          metadata: {
+            supabaseUserId: supabaseId,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      return data;
+    },
+  });
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
@@ -33,14 +62,56 @@ export function LoginForm({
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+
+      if (data && data.user) {
+        // Check if user already has a customerId
+        const existingCustomerId = data.user.user_metadata?.customerId;
+
+        if (!existingCustomerId) {
+          // Only create customer if one doesn't exist
+          console.log("Creating customer for user:", data.user.id);
+
+          const customerResponse = await createCustomerMutation.mutateAsync({
+            email: email,
+            supabaseId: data.user.id,
+          });
+
+          if (customerResponse.success) {
+            const customerId = String(customerResponse.customerId);
+            console.log(
+              "Customer created, updating user metadata with:",
+              customerId
+            );
+
+            const { error: updateError } = await supabase.auth.updateUser({
+              data: {
+                customerId: customerId,
+              },
+            });
+
+            if (updateError) {
+              console.error("Failed to update user metadata:", updateError);
+            } else {
+              console.log("User metadata updated successfully");
+            }
+          } else {
+            console.error("Failed to create customer:", customerResponse.error);
+          }
+        } else {
+          console.log("User already has customerId:", existingCustomerId);
+        }
+
+        // Redirect to protected page
+        router.push("/protected");
+      }
     } catch (error: unknown) {
+      console.error("Login error:", error);
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
