@@ -87,7 +87,15 @@ Where you would see your stripe's customer id.
 
 Then you can go to the Stripe Dashboard and you would see your user created in that.
 
-# How to fire webhooks
+## How to fire webhooks
+
+Go to `/protected` route and click on `Create Subscription` button.
+
+After that, a webhook will be triggered and you will see a new subscription in your Stripe Dashboard and Supabase DB.
+
+Then you will be able to see the subscription in the ui, and you can delete or update it, both will trigger a webhook.
+
+## How to test webhooks manually
 
 From your terminal run:
 
@@ -106,7 +114,7 @@ stripe trigger customer.subscription.deleted
 5. You have Supabase Edge Functions set up
 6. You have Supabase Schema set up
 
-# Time spent
+## Time spent
 
 I have never used Supbase/Firebase, Webhooks or Stripe before. So it took me a while to figure out how to do this. I'm sure there are better ways to do this, but this is what I came up with.
 
