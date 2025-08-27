@@ -36,7 +36,7 @@ export function LoginForm({
       email: string;
       supabaseId: string;
     }) => {
-      const response = await fetch("/api/get-or-create-customer", {
+      const response = await fetch("/api/create-customer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
