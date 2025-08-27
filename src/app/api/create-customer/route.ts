@@ -48,6 +48,9 @@ export async function POST(request: NextRequest) {
         default_price_data: {
           currency: "usd",
           unit_amount: 1000,
+          recurring: {
+            interval: "month",
+          },
         },
       });
     }
