@@ -1,21 +1,13 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
-import { createCustomerSchema } from "@/lib/schemas";
 
 export async function POST(request: NextRequest) {
-  const data = await request.json();
-
-  const safeData = createCustomerSchema.safeParse(data);
-
-  if (!safeData.success) {
-    return NextResponse.json(safeData.error, { status: 400 });
-  }
-
   try {
+    const data = await request.json();
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
     const search = await stripe.customers.search({
-      query: `email:'${safeData.data.email}'`,
+      query: `email:'${data.email}'`,
       limit: 1,
     });
 
@@ -23,9 +15,9 @@ export async function POST(request: NextRequest) {
 
     if (!customer) {
       customer = await stripe.customers.create({
-        email: safeData.data.email,
-        description: safeData.data.description,
-        metadata: safeData.data.metadata,
+        email: data.email,
+        description: data.description,
+        metadata: data.metadata,
       });
     }
 
