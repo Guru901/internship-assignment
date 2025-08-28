@@ -113,6 +113,7 @@ stripe trigger customer.subscription.deleted
 4. You have a Stripe webhooks set up
 5. You have Supabase Edge Functions set up
 6. You have Supabase Schema set up
+7. You have a product name `Test Product` with monthly reccuring payments in Stripe. There is functionality to create a product in the api as well but that's slow so it's better to just create it in the Stripe Dashboard.
 
 ## Time spent
 
